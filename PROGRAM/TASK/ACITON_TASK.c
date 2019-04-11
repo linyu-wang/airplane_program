@@ -75,6 +75,9 @@ static void Air_init(Air_move_t *Air_move_init)
 		
 		//获取距离传感器指针
 		Air_move_init->Air_distance = get_distance_control_point();
+		
+		//获取位置传感器指针
+		Air_move_init->Air_position = get_position_control_point();		
 
     //初始化PID 运动
     PID_Init( &Air_move_init->X_position_PID, PID_POSITION, X_position_pid, X_position_MAX_OUT, X_position_MAX_IOUT);  //位置式
@@ -96,19 +99,15 @@ static void Air_set_mode(Air_move_t *Air_move_mode)
         return;
     }
 		
-	 if( switch_is_mid(Air_move_mode->Air_RC->rc.s[MODE_CHANNEL]) )
-	  {
-			 if( switch_is_up(Air_move_mode->Air_RC->rc.s[SENSOR_CHANNEL]) )     Air_move_mode->Air_model = AIR_RC_SENSOR_ALTHOLD;  
-			 if( switch_is_mid(Air_move_mode->Air_RC->rc.s[SENSOR_CHANNEL]) )    Air_move_mode->Air_model = AIR_RC_ALTHOLD;
-			 if( switch_is_down(Air_move_mode->Air_RC->rc.s[SENSOR_CHANNEL]) )   Air_move_mode->Air_model = AIR_RC_STABILIZE;
-	  }
-   else if( switch_is_up(Air_move_mode->Air_RC->rc.s[MODE_CHANNEL]) )
+	 if( switch_is_up(Air_move_mode->Air_RC->rc.s[MODE_CHANNEL]) )
 	  {
 	     Air_move_mode->Air_model = AIR_FOLLOW;
 	  }
-   else if(switch_is_down(Air_move_mode->Air_RC->rc.s[MODE_CHANNEL]) )
+   else
 	  {
-	     Air_move_mode->Air_model = AIR_STOP;
+			 if( switch_is_up(Air_move_mode->Air_RC->rc.s[SENSOR_CHANNEL]) )     Air_move_mode->Air_model = AIR_RC_SENSOR_ALTHOLD;  
+			 if( switch_is_mid(Air_move_mode->Air_RC->rc.s[SENSOR_CHANNEL]) )    Air_move_mode->Air_model = AIR_RC_ALTHOLD;
+			 if( switch_is_down(Air_move_mode->Air_RC->rc.s[SENSOR_CHANNEL]) )   Air_move_mode->Air_model = AIR_STOP;
 	  }	
 }
 
@@ -131,10 +130,10 @@ static void Air_mode_change_control_transit(Air_move_t *Air_move_transit)
 		//清除PID计算数据
     PID_clear(&Air_move_transit->X_position_PID);
     PID_clear(&Air_move_transit->Y_position_PID);		
+    PID_clear(&Air_move_transit->Z_position_PID);	
 		
 		//重设期望高度为当前高度
 		Air_move_transit->Air_height_set  = Air_move_transit->Air_Z_rx ;
-		
 		
 		Air_move_transit->Last_Air_model = Air_move_transit->Air_model;
 }
@@ -153,10 +152,9 @@ static void Air_feedback_update(Air_move_t *Air_move_update)
 
    Air_move_update->Air_Z_rx = Air_move_update->Air_distance->distance_rx;
 		
-   Air_move_update->Air_X_rx = 0;
-	 Air_move_update->Air_Y_rx = 0;
+   Air_move_update->Air_X_rx = Air_move_update->Air_position->position_x;
+	 Air_move_update->Air_Y_rx = Air_move_update->Air_position->position_y;
 }
-
 
 
 
@@ -183,19 +181,6 @@ static void Air_set_contorl(Air_move_t  *Air_move_control_set)
 		
 	
 		
-	 //自稳模式下
-		if( Air_move_control_set->Air_model == AIR_RC_STABILIZE )
-		{
-			 Air_move_control_set->Air_throttle_set = ( Air_move_control_set->Air_RC->rc.ch[THROTTLE_CHANNEL] +660.0f )* CHANNEL_to_PPM_SEN + 25.2f;
-			 Air_move_control_set->Air_yaw_set = ( Air_move_control_set->Air_RC->rc.ch[YAW_CHANNEL] + 660.0f ) * CHANNEL_to_PPM_SEN + 25.2f;
-			 Air_move_control_set->Air_pitch_set = ( - Air_move_control_set->Air_RC->rc.ch[PITCH_CHANNEL] + 660.0f ) * CHANNEL_to_PPM_SEN + 25.2f;    
-			 Air_move_control_set->Air_roll_set = ( Air_move_control_set->Air_RC->rc.ch[ROLL_CHANNEL] + 660.0f ) * CHANNEL_to_PPM_SEN + 25.2f;
-			
-			 Air_move_control_set->Air_model_set    = STABILIZE_DATA;		//自稳模式
-		}	
-
-		
-		
    //遥控器定高模式下
 	  if( Air_move_control_set->Air_model == AIR_RC_ALTHOLD )
 		{ 
@@ -220,10 +205,10 @@ static void Air_set_contorl(Air_move_t  *Air_move_control_set)
 			Air_move_control_set->Air_height_set  =  Air_move_control_set->Air_height_set > MAX_POSITIN_Z ? MAX_POSITIN_Z : Air_move_control_set->Air_height_set;
 			Air_move_control_set->Air_height_set  =  Air_move_control_set->Air_height_set < MIN_POSITIN_Z ? MIN_POSITIN_Z : Air_move_control_set->Air_height_set;
 		
-			//油门控制位置修正	
+			//油门控制高度修正	
 			Air_move_control_set->Air_throttle_set = PID_Calc( &Air_move_control_set->Z_position_PID , Air_move_control_set->Air_Z_rx , Air_move_control_set->Air_height_set) +  50.0f ;
 	
-			//YAW，pitch，roll 油门控制
+			//YAW，pitch，roll 油门控制（pitch反的）
 			Air_move_control_set->Air_yaw_set = ( Air_move_control_set->Air_RC->rc.ch[YAW_CHANNEL] + 660.0f ) * CHANNEL_to_PPM_SEN + 25.2f;
 			Air_move_control_set->Air_pitch_set = ( - Air_move_control_set->Air_RC->rc.ch[PITCH_CHANNEL] + 660.0f ) * CHANNEL_to_PPM_SEN + 25.2f;  
 			Air_move_control_set->Air_roll_set = ( Air_move_control_set->Air_RC->rc.ch[ROLL_CHANNEL] + 660.0f ) * CHANNEL_to_PPM_SEN + 25.2f;	
@@ -233,19 +218,31 @@ static void Air_set_contorl(Air_move_t  *Air_move_control_set)
 		
 		
 		
-	  //跟随模式下
+	  //定点跟随模式下
 	  if( Air_move_control_set->Air_model == AIR_FOLLOW )
 		{
 			
-			//高度位置修正
+			//标准高度位置修正
 			Air_move_control_set->Air_throttle_set = PID_Calc( &Air_move_control_set->Z_position_PID , Air_move_control_set->Air_Z_rx , STAND_POSITIN_Z ) +  50.0f ;
 			
 			//YAW轴方向不变
 			 Air_move_control_set->Air_yaw_set = CHANNEL_HALF;
 			
-			//pitch 和roll轴PID油门控制
-		   Air_move_control_set->Air_roll_set     =  PID_Calc( &Air_move_control_set->X_position_PID , Air_move_control_set->Air_X_rx , STAND_POSITIN_X ) +  50.0f ;
-		   Air_move_control_set->Air_pitch_set    =  PID_Calc( &Air_move_control_set->Y_position_PID , Air_move_control_set->Air_Y_rx , STAND_POSITIN_Y ) +  50.0f ;
+			//pitch 和roll轴PID油门控制（pitch反的）
+			if( (Air_move_control_set->Air_position->last_position_x != Air_move_control_set->Air_position->position_x)  || 
+				  (Air_move_control_set->Air_position->last_position_y != Air_move_control_set->Air_position->position_y)    )
+			{
+		    Air_move_control_set->Air_roll_set     =    PID_Calc( &Air_move_control_set->X_position_PID , Air_move_control_set->Air_X_rx , STAND_POSITIN_X ) +  50.0f ;
+		    Air_move_control_set->Air_pitch_set    =  - PID_Calc( &Air_move_control_set->Y_position_PID , Air_move_control_set->Air_Y_rx , STAND_POSITIN_Y ) +  50.0f ;
+			}
+			else
+			{
+				PID_clear(&Air_move_control_set->X_position_PID);
+        PID_clear(&Air_move_control_set->Y_position_PID);
+				
+			  Air_move_control_set->Air_roll_set = ( Air_move_control_set->Air_RC->rc.ch[ROLL_CHANNEL] + 660.0f ) * CHANNEL_to_PPM_SEN + 25.2f;	
+				Air_move_control_set->Air_pitch_set = ( - Air_move_control_set->Air_RC->rc.ch[PITCH_CHANNEL] + 660.0f ) * CHANNEL_to_PPM_SEN + 25.2f;  
+			}
 			
 			 Air_move_control_set->Air_model_set    = ALTHOLD_DATA;		  //定高模式	  
 		}

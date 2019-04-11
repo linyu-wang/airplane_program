@@ -9,7 +9,7 @@
 
 #include "RC_Control.h"
 #include "distance_control.h" 
-
+#include "position_control.h" 
 
 #include "START_TASK.h"
 
@@ -17,8 +17,7 @@ void BSP_init(void);
 
 
 int main(void)
-{ 
-
+{
 	BSP_init();              //设备初始化
 	startTask();             //创建开始任务
   vTaskStartScheduler();   //开启任务调度
@@ -33,7 +32,8 @@ void BSP_init(void)
 	LED_Init();		            //初始化LED端口
 	ppm_Init();               //初始化PPM发生器
 	remote_control_init();    //初始化遥控器
-  distance_control_init();  //初始化测距
+  distance_control_init();  //初始化高度测量
+	position_control_init();  //初始化位置测量
 }
 
 

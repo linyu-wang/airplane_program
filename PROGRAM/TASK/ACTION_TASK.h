@@ -5,6 +5,7 @@
 #include "RC_Control.h"
 #include "PPM_TASK.h"
 #include "distance_control.h" 
+#include "position_control.h" 
 
 #include "pid.h"
 
@@ -37,23 +38,23 @@
 #define   STAND_POSITIN_Z     60.0f     //标准距离信息
 #define   MAX_POSITIN_Z      100.0f     //最高距离信息
 
-#define   STAND_POSITIN_Y    300.0f     //标准像素点信息
-#define   STAND_POSITIN_X    300.0f     //标准像素点信息
+#define   STAND_POSITIN_Y    120.0f     //标准像素点信息
+#define   STAND_POSITIN_X    160.0f     //标准像素点信息
 
 
 //X轴位置PID参数（飞机左右 向右为正）
-#define  X_position_KP        0.0f
-#define  X_position_KI        0.0f
-#define  X_position_KD        0.0f
-#define  X_position_MAX_IOUT  0.0f
-#define  X_position_MAX_OUT   0.0f
+#define  X_position_KP           0.1f
+#define  X_position_KI           0.0f
+#define  X_position_KD        2000.0f
+#define  X_position_MAX_IOUT     0.0f
+#define  X_position_MAX_OUT      5.0f
 
 //Y轴位置PID参数（飞机前后 向前为正）
-#define  Y_position_KP        0.0f
-#define  Y_position_KI        0.0f
-#define  Y_position_KD        0.0f
-#define  Y_position_MAX_IOUT  0.0f
-#define  Y_position_MAX_OUT   0.0f
+#define  Y_position_KP           0.1f
+#define  Y_position_KI           0.0f
+#define  Y_position_KD        2000.0f
+#define  Y_position_MAX_IOUT     0.0f
+#define  Y_position_MAX_OUT      5.0f
 
 //Z轴位置KP参数（飞机上下 向上为正）
 #define  Z_position_KP           0.3f   
@@ -67,7 +68,6 @@
 //飞行模式枚举·
 typedef enum
 {
-	  AIR_RC_STABILIZE,
     AIR_RC_ALTHOLD,
     AIR_RC_SENSOR_ALTHOLD,
     AIR_FOLLOW,
@@ -86,6 +86,8 @@ typedef struct
   const RC_ctrl_t           *Air_RC;           //遥控器RC数据包
 	PPM_control_t             *Air_PPM;          //遥控器PPM数据包
 	const distance_control_t  *Air_distance;     //距离传感器数据包
+	const position_control_t  *Air_position;     //位置传感器数据包
+	
 	
   fp32               Air_Z_rx;   //飞行器Z轴位置反馈
   fp32               Air_Y_rx;   //飞行器Y轴位置反馈

@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\HARDWARE\LED;..\FWLIB\inc;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\TASK;..\HARDWARE\PPM;..\BEHAVIOUR;..\HARDWARE\RC;..\HARDWARE\TIMER;..\HARDWARE\SONIC</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\HARDWARE\LED;..\FWLIB\inc;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\TASK;..\HARDWARE\PPM;..\BEHAVIOUR;..\HARDWARE\RC;..\HARDWARE\TIMER;..\HARDWARE\SONIC;..\HARDWARE\CAMERA</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -540,6 +540,11 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\SONIC\sonic.c</FilePath>
             </File>
+            <File>
+              <FileName>camera.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\CAMERA\camera.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -554,6 +559,11 @@
               <FileName>distance_control.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BEHAVIOUR\distance_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>position_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BEHAVIOUR\position_control.c</FilePath>
             </File>
             <File>
               <FileName>pid.c</FileName>

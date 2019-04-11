@@ -52,4 +52,5 @@
 ..\obj\main.o: ..\HARDWARE\PPM\ppm.h
 ..\obj\main.o: ..\BEHAVIOUR\RC_Control.h
 ..\obj\main.o: ..\BEHAVIOUR\distance_control.h
+..\obj\main.o: ..\BEHAVIOUR\position_control.h
 ..\obj\main.o: ..\TASK\START_TASK.h

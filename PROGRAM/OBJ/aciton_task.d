@@ -39,6 +39,7 @@
 ..\obj\aciton_task.o: ..\BEHAVIOUR\RC_Control.h
 ..\obj\aciton_task.o: ..\TASK\PPM_TASK.h
 ..\obj\aciton_task.o: ..\BEHAVIOUR\distance_control.h
+..\obj\aciton_task.o: ..\BEHAVIOUR\position_control.h
 ..\obj\aciton_task.o: ..\BEHAVIOUR\pid.h
 ..\obj\aciton_task.o: ..\FreeRTOS\include\FreeRTOS.h
 ..\obj\aciton_task.o: C:\Keil\ARM\ARMCC\Bin\..\include\stddef.h

@@ -53,4 +53,5 @@
 ..\obj\start_task.o: ..\TASK\ACTION_TASK.h
 ..\obj\start_task.o: ..\BEHAVIOUR\RC_Control.h
 ..\obj\start_task.o: ..\BEHAVIOUR\distance_control.h
+..\obj\start_task.o: ..\BEHAVIOUR\position_control.h
 ..\obj\start_task.o: ..\BEHAVIOUR\pid.h
